@@ -22,3 +22,7 @@ Live: https://vssgpt.github.io/config/
 Every route folder holds the same `index.html`; the page reads the last part of the URL to pick the pack. `#slug` links (e.g. `/config/#sameen`) work too.
 
 Built on vssgpt.
+
+## Editing
+
+`sweet-sticks.html` is the source. After changing it, run `python3 build.py` to refresh `index.html`, `404.html` and the route folders, then push. `.github/workflows/pages.yml` deploys every push to `main`.

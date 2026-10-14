@@ -30,7 +30,7 @@ body{
 #stage canvas{display:block; width:100%; height:100%}
 .tabs{
   position:fixed; z-index:5; left:50%; top:calc(env(safe-area-inset-top,0px) + 16px); transform:translateX(-50%);
-  display:flex; gap:4px; padding:4px; border-radius:999px; background:rgba(91,26,31,.08);
+  display:flex; gap:4px; padding:4px; border-radius:999px; background:#ddd0b6; box-shadow:0 0 0 6px var(--counter);
 }
 .tabs a{
   display:block; padding:8px 18px; border-radius:999px; text-decoration:none; color:var(--oxblood);
@@ -57,14 +57,11 @@ body{
 .pack-tile b{font-size:13px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .pack-tile small{font-size:10px; opacity:.65; line-height:1.3; max-width:100%; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
 .pack-tile.soon b{opacity:.75}
-.foot{
-  position:fixed; z-index:5; left:0; right:0; bottom:calc(env(safe-area-inset-bottom,0px) + 12px);
-  text-align:center; font-size:11px; letter-spacing:.08em; color:var(--ink-soft); pointer-events:none;
-}
-.foot a{color:var(--oxblood); font-weight:700; text-decoration:none; pointer-events:auto}
+.foot{margin-top:40px; text-align:center; font-size:11px; letter-spacing:.08em; color:var(--ink-soft)}
+.foot a{color:var(--oxblood); font-weight:700; text-decoration:none}
 .foot a:hover{text-decoration:underline; text-underline-offset:3px}
 .hint{
-  position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 44px); transform:translateX(-50%);
+  position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 28px); transform:translateX(-50%);
   background:var(--oxblood); color:var(--paper); font-weight:700; font-size:14px; letter-spacing:.02em;
   padding:10px 18px; border-radius:999px; white-space:nowrap; pointer-events:none;
   transition:opacity .35s, transform .35s; box-shadow:0 6px 18px rgba(91,26,31,.25);
@@ -135,10 +132,9 @@ dd{margin:0; min-width:0}
 
 <div id="stage" aria-label="A pack of sweet sticks. Flick up or tap to open, then tap a stick."></div>
 <nav class="tabs" aria-label="Packs"><a href="#all" id="tabAll">All</a><a href="#vishesh" id="tabMe">Vishesh</a></nav>
-<section id="all" hidden aria-label="Everyone's packs"><div class="shelf" id="shelf"></div></section>
+<section id="all" hidden aria-label="Everyone's packs"><div class="shelf" id="shelf"></div><footer class="foot">Built on <a href="https://visheshgupta.framer.website" target="_blank" rel="noopener">vssgpt</a></footer></section>
 <div class="hint gone" id="hint"><span class="arrow">↑</span><span id="hintText">Flick up to open</span></div>
 
-<footer class="foot">Built on <a href="https://visheshgupta.framer.website" target="_blank" rel="noopener">vssgpt</a></footer>
 
 <div id="scrim"></div>
 <div id="scroll" role="dialog" aria-modal="true" aria-labelledby="cardName">
@@ -151,7 +147,7 @@ dd{margin:0; min-width:0}
       </div>
       <dl id="cardDl"></dl>
       <div class="links" id="cardLinks"></div>
-      <button id="back" type="button">Burn it</button>
+      <button id="back" type="button">Chew it</button>
     </div>
   </div>
 </div>
@@ -461,8 +457,48 @@ async function burn(stick){
   stick.userData.burnt={tip,tipMat};
 }
 function restoreStick(stick){
-  const [body,tip]=stick.children; body.scale.y=1; body.position.y=0; tip.position.y=L_STICK/2-.02;
+  const [body,tip]=stick.children; body.scale.y=1; body.position.y=0; tip.position.y=L_STICK/2-.02; tip.visible=true; stick.visible=true;
+  if(stick.userData.cap){stick.remove(stick.userData.cap); stick.userData.cap=null;}
   if(stick.userData.burnt){tip.material=stick.userData.burnt.tipMat; stick.userData.burnt=null;}
+}
+// ---------- chewing: 3 to 5 bites and it's gone ----------
+const biteGeo=(()=>{const g=new THREE.CylinderGeometry(SR*1.002,SR*1.002,.06,14,1); const p=g.attributes.position;
+  for(let i=0;i<p.count;i++){ if(p.getY(i)>0) p.setY(i, p.getY(i)-Math.random()*.05); } p.needsUpdate=true; g.computeVertexNormals(); return g;})();
+const crumbGeo=new THREE.BoxGeometry(.035,.035,.035);
+const crumbMats=[sMat,tMat,new THREE.MeshStandardMaterial({color:0xf3ece2,roughness:.9})];
+const crumbs=[];
+function crumbBurst(pos,n){
+  if(RM) return;
+  for(let i=0;i<n;i++){
+    const m=new THREE.Mesh(crumbGeo,crumbMats[i%5===0?1:(i%2?0:2)]); m.position.copy(pos);
+    m.scale.setScalar(.5+Math.random()*1.1); m.rotation.set(Math.random()*6,Math.random()*6,0); scene.add(m);
+    crumbs.push({m, v:new THREE.Vector3((Math.random()-.2)*2.2,1+Math.random()*1.6,(Math.random()-.3)*1.6), spin:(Math.random()-.5)*14, born:performance.now()});
+  }
+}
+function tickCrumbs(now,dt){
+  for(let i=crumbs.length-1;i>=0;i--){
+    const c=crumbs[i]; c.v.y-=9*dt; c.m.position.addScaledVector(c.v,dt); c.m.rotation.x+=c.spin*dt; c.m.rotation.z+=c.spin*dt*.7;
+    if(now-c.born>1400 || c.m.position.y<-4){scene.remove(c.m); crumbs.splice(i,1);}
+  }
+}
+async function chew(stick){
+  hint.classList.add('gone');
+  const [body,tip]=stick.children; const bites=3+Math.floor(Math.random()*3);
+  const cap=new THREE.Mesh(biteGeo,sMat); cap.visible=false; stick.add(cap); stick.userData.cap=cap;
+  const z0=stick.position.z, wp=new THREE.Vector3(); let k=1;
+  for(let b=1;b<=bites;b++){
+    // lean in for the bite
+    await tween(RM?20:110,p=>{stick.position.z=z0+.22*p; stick.rotation.y=Math.sin(p*Math.PI)*.08;},eio);
+    k=1-b/bites; const top=-L_STICK/2+L_STICK*k;
+    stick.localToWorld(wp.set(0,top+L_STICK/bites*.5,0)); crumbBurst(wp, b===bites?22:10+Math.floor(Math.random()*5));
+    if(k<=0){ stick.visible=false; }
+    else{ body.scale.y=k; body.position.y=-L_STICK/2+L_STICK*k/2; tip.visible=false; cap.visible=true; cap.position.y=top+.005; cap.rotation.y=Math.random()*6; }
+    // chomp: squash and spring back
+    await tween(RM?20:170,p=>{stick.position.z=z0+.22*(1-p); const q=Math.sin(p*Math.PI); stick.scale.set(1+q*.12,1,1+q*.12);},eo3);
+    stick.scale.set(1,1,1);
+    if(b<bites) await new Promise(r=>setTimeout(r,RM?0:90));
+  }
+  await new Promise(r=>setTimeout(r,RM?0:350));
 }
 const scroll=document.getElementById('scroll'), scrim=document.getElementById('scrim');
 function unroll(from,to,dur){
@@ -478,15 +514,9 @@ async function burnIt(){
   await unroll(1,0,700);
   scroll.classList.remove('rolled');
   const s=pulled; s.visible=true;
-  await burn(s);
-  // stub gets crushed, then flicked away
-  const sc=s.scale.clone();
-  await tween(260,p=>{s.scale.set(sc.x*(1+p*.5),sc.y*(1-p*.25),sc.z*(1+p*.5)); s.rotation.y+=.02;},eo3);
-  const wp=new THREE.Vector3(); s.getWorldPosition(wp); if(!RM) for(let i=0;i<4;i++) puff(wp.clone().add(new THREE.Vector3((Math.random()-.5)*.3,0,0)));
-  const p0=s.position.clone(), r0=s.rotation.z;
-  await tween(620,p=>{s.position.set(p0.x+p*1.6, p0.y-p*p*4.5, p0.z+p*.4); s.rotation.z=r0+p*5;},t=>t);
-  // endless pack: a fresh stick rises back into the same slot
-  scene.remove(s); s.scale.copy(sc); restoreStick(s);
+  await chew(s);
+  // endless pack: a fresh stick appears back in the same slot
+  scene.remove(s); restoreStick(s);
   s.position.copy(s.userData.home); s.quaternion.identity(); inner.add(s);
   const by=base.y;
   await tween(500,p=>{base.y=by*(1-p);},eio);
@@ -541,7 +571,7 @@ addEventListener('pointermove',e=>{
 });
 let lastT=0;
 function loop(now){
-  const dt=Math.min(.05,(now-(lastT||now))/1000); lastT=now; tickSmoke(now,dt);
+  const dt=Math.min(.05,(now-(lastT||now))/1000); lastT=now; tickSmoke(now,dt); tickCrumbs(now,dt);
   for(let i=tweens.length-1;i>=0;i--){const tw=tweens[i]; const p=Math.min(1,(now-tw.t0)/tw.dur); tw.fn(tw.ease(p)); if(p>=1){tweens.splice(i,1); tw.res();}}
   drag.x+=(drag.tx-drag.x)*.12; drag.y+=(drag.ty-drag.y)*.12;
   const bob=RM?0:Math.sin(now/900)*.03;
