@@ -1,0 +1,24 @@
+# Sweet Sticks
+
+A pack of sweet sticks for each person on the team. Flick a pack open, pull a stick, and it unrolls into that person's visiting card.
+
+Live: https://vssgpt.github.io/config/
+
+## Routes (for QR codes)
+
+| Person | Link |
+|---|---|
+| Everyone | /config/all/ |
+| Vishesh | /config/vishesh/ |
+| Kashish | /config/kashish/ (or /kbhumbri/) |
+| Atharva | /config/atharva/ (or /athvkd/) |
+| Sameen | /config/sameen/ (or /sam/) |
+| Eemon | /config/eemon/ |
+| Deepika | /config/deepika/ |
+| Arjun | /config/arjun/ |
+| Mohak | /config/mohak/ |
+| Parinishtha | /config/parinishtha/ (or /pari/) |
+
+Every route folder holds the same `index.html`; the page reads the last part of the URL to pick the pack. `#slug` links (e.g. `/config/#sameen`) work too.
+
+Built on vssgpt.
