@@ -86,8 +86,8 @@ h1 .dot{color:var(--green)}
 .links a:hover .arr{transform:translate(3px,-3px)}
 
 /* glyph floor */
-.floor{display:block;width:100%;height:clamp(110px,16vw,190px);margin-top:clamp(2.5rem,5vw,4rem)}
-footer{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-block:1.1rem 1.6rem;font-family:var(--mono);font-size:12px;color:var(--mute)}
+
+footer{margin-top:clamp(2.5rem,5vw,4rem);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-block:1.1rem 1.6rem;font-family:var(--mono);font-size:12px;color:var(--mute)}
 
 @media (max-width:820px){
   .hero{grid-template-columns:1fr}
@@ -143,8 +143,6 @@ footer{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;paddin
     <a href="https://www.instagram.com/vssgpt" target="_blank" rel="noopener"><div><span class="k">Instagram</span><span class="v">@vssgpt</span></div><span class="arr">↗</span></a>
     <a href="https://x.com/vssgptx" target="_blank" rel="noopener"><div><span class="k">X</span><span class="v">@vssgptx</span></div><span class="arr">↗</span></a>
   </nav>
-
-  <canvas class="floor" id="floor" aria-hidden="true"></canvas>
   <footer><span>/vishesh/ — 2026</span></footer>
 </div>
 
@@ -196,7 +194,6 @@ const css=getComputedStyle(document.documentElement);
 const green=css.getPropertyValue('--green').trim(),black=css.getPropertyValue('--bg').trim();
 // palette: yellow, green, lilac, blue, red, pink
 const PALETTE=['#FBFD45','#00D572','#D9A8DB','#00C3FF','#FF7427','#FFCDC6'];
-glyphs(document.getElementById('floor'),{fg:PALETTE,bg:black,cell:(w,h)=>h/2,seed:Math.floor(Math.random()*1e6)+1,animate:true});
 </script>
 
 </body>
