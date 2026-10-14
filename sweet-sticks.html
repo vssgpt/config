@@ -261,7 +261,13 @@ function sideCanvas(P){
   ctx.fillStyle=C.cream; ctx.fillRect(0,h-100,w,100);
   ctx.save(); ctx.translate(w/2,(h*lidFrac+h-100)/2); ctx.rotate(-Math.PI/2);
   ctx.fillStyle=K.onBox; ctx.textAlign='center'; ctx.textBaseline='middle';
-  const t=`${P.brand}  ✦  10`; fitText(ctx,t,560,92,DISP); ctx.fillText(t,0,4); ctx.restore();
+  // brand  ✦  four-square mark (in place of the 10)
+  const t=`${P.brand}  ✦  `; const sz=fitText(ctx,t+'MM',560,92,DISP); ctx.font=`700 ${sz}px ${DISP}`;
+  const tw=ctx.measureText(t).width, g=sz*.62, gap=g*.08, total=tw+g, x0=-total/2;
+  ctx.textAlign='left'; ctx.fillText(t,x0,4);
+  const gx=x0+tw, gy=-g/2, q=(g-gap)/2;
+  ctx.fillRect(gx,gy,q,q); ctx.fillRect(gx+q+gap,gy,q,q); ctx.fillRect(gx,gy+q+gap,q,q); ctx.fillRect(gx+q+gap,gy+q+gap,q,q);
+  ctx.restore();
   return c;
 }
 function wrap(ctx,text,x,y,maxW,lh){
