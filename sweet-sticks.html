@@ -25,6 +25,7 @@ body.on-all #all{padding-top:calc(env(safe-area-inset-top,0px) + 112px)}
   position:fixed; z-index:5; left:50%; top:calc(env(safe-area-inset-top,0px) + 16px); transform:translateX(-50%);
   display:flex; gap:4px; padding:4px; border-radius:999px; background:#ddd0b6; box-shadow:0 0 0 6px var(--counter);
 }
+.tabs .ms{width:11px; height:11px; fill:currentColor; margin-right:7px; vertical-align:-1px}
 .tabs a{
   display:block; padding:8px 18px; border-radius:999px; text-decoration:none; color:var(--oxblood);
   font:700 13px var(--body); letter-spacing:.06em; white-space:nowrap; max-width:42vw; overflow:hidden; text-overflow:ellipsis;
@@ -124,7 +125,7 @@ dd{margin:0; min-width:0}
 </style>
 
 <div id="stage" aria-label="A pack of sweet sticks. Flick up or tap to open, then tap a stick."></div>
-<nav class="tabs" aria-label="Packs"><a href="#all" id="tabAll">All</a><a href="#vishesh" id="tabMe">Vishesh</a></nav>
+<nav class="tabs" aria-label="Packs"><a href="#all" id="tabAll"><svg class="ms" viewBox="0 0 10 10" aria-hidden="true"><rect width="4.6" height="4.6"/><rect x="5.4" width="4.6" height="4.6"/><rect y="5.4" width="4.6" height="4.6"/><rect x="5.4" y="5.4" width="4.6" height="4.6"/></svg>All</a><a href="#vishesh" id="tabMe">Vishesh</a></nav>
 <section id="all" hidden aria-label="Everyone's packs"><div class="shelf" id="shelf"></div><footer class="foot">Built on <a href="https://visheshgupta.framer.website" target="_blank" rel="noopener">vssgpt</a></footer></section>
 <div class="hint gone" id="hint"><span class="arrow">↑</span><span id="hintText">Flick up to open</span></div>
 
