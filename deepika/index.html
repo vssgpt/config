@@ -97,7 +97,7 @@ body{
 }
 .curl::after{
   content:""; position:absolute; right:0; top:0; bottom:0; width:calc(16px - var(--p) * 12px); border-radius:999px;
-  background:linear-gradient(180deg,#f2a07a, #7a2b1a); opacity:calc(1 - var(--p) * 1.4);
+  background:var(--accent,var(--candy-tip)); box-shadow:inset 0 -3px 4px rgba(0,0,0,.18); opacity:calc(1 - var(--p) * 1.4);
 }
 .card{padding:30px 24px 26px; display:grid; gap:18px}
 .eyebrow{margin:0; font-size:11px; letter-spacing:.2em; text-transform:uppercase; font-weight:700; color:var(--ink-soft); font-variant-numeric:tabular-nums}
@@ -302,6 +302,8 @@ function disposeTree(o){o.traverse(n=>{if(n.geometry) n.geometry.dispose(); cons
 // ---------- build a pack into any group ----------
 const sMat=mat(tex(sugar('#fffdf8','#d9cfc2',900)),{roughness:.85});
 const tMat=mat(tex(sugar('#e2557a','#ffd1dc',700)),{roughness:.8});
+const tipMats={}; // one sugared tip per pack colour
+function tipMatFor(pal){return tipMats[pal]||(tipMats[pal]=mat(tex(sugar(PAL[pal].box,'#ffffff',700)),{roughness:.8}));}
 const L=2.2, SR=.112, sGeo=new THREE.CylinderGeometry(SR,SR,L,28), tGeo=new THREE.CylinderGeometry(SR*1.01,SR*1.01,.05,28);
 function buildPack(P,into){
   const f=frontCanvas(P), s=sideCanvas(P), b=backCanvas(P);
@@ -324,7 +326,7 @@ function buildPack(P,into){
     const g=new THREE.Group(); const jitter=(Math.sin(n*12.9)*.5+.5)*.08;
     g.position.set(-.48+c*.24, L/2+.03+jitter, r? -.13:.13);
     const m=new THREE.Mesh(sGeo,sMat); g.add(m);
-    const tip=new THREE.Mesh(tGeo,tMat); tip.position.y=L/2-.02; g.add(tip);
+    const tip=new THREE.Mesh(tGeo,tipMatFor(P.pal)); tip.position.y=L/2-.02; g.add(tip);
     m.userData.stick=g; tip.userData.stick=g; g.userData={index:++n, homeY:g.position.y, home:g.position.clone()};
     into.add(g); st.push(g); meshes.push(m,tip);
   }
@@ -472,7 +474,7 @@ const crumbs=[];
 function crumbBurst(pos,n){
   if(RM) return;
   for(let i=0;i<n;i++){
-    const m=new THREE.Mesh(crumbGeo,crumbMats[i%5===0?1:(i%2?0:2)]); m.position.copy(pos);
+    const m=new THREE.Mesh(crumbGeo,i%5===0?tipMatFor(current.pal):crumbMats[i%2?0:2]); m.position.copy(pos);
     m.scale.setScalar(.5+Math.random()*1.1); m.rotation.set(Math.random()*6,Math.random()*6,0); scene.add(m);
     crumbs.push({m, v:new THREE.Vector3((Math.random()-.2)*2.2,1+Math.random()*1.6,(Math.random()-.3)*1.6), spin:(Math.random()-.5)*14, born:performance.now()});
   }
