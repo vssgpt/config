@@ -226,6 +226,8 @@ const IG=h=>({label:'Instagram',handle:'@'+h,url:'https://www.instagram.com/'+h+
   p.ingredients=[`Now: ${p.role}, ${p.sub}.`].concat(p.before?[`Previously at ${p.before.replace(', ',' and ')}.`]:[]).concat(['Made in India.']);
   PEOPLE.push(p);
 });
+// shelf order: Parinishtha first
+PEOPLE.unshift(...PEOPLE.splice(PEOPLE.findIndex(p=>p.slug==='pari'),1));
 PEOPLE.forEach(p=>{p.portrait=PORTRAITS[p.slug]||null;});
 const bySlug=Object.fromEntries(PEOPLE.flatMap(p=>[[p.slug,p]].concat(p.alias&&p.alias!==p.slug?[[p.alias,p]]:[])));
 
@@ -632,7 +634,7 @@ function buildShelf(){
 
 // ---------- routing: #all, #slug, or /slug on your own host ----------
 const tabAll=document.getElementById('tabAll'), tabMe=document.getElementById('tabMe'), allView=document.getElementById('all');
-let focusP=PEOPLE[0], booted=false;
+let focusP=PEOPLE.find(p=>p.slug==='vishesh'), booted=false; // default pack stays Vishesh
 function readRoute(){
   const h=decodeURIComponent(location.hash.slice(1)).toLowerCase();
   if(h==='all') return 'all';
