@@ -609,23 +609,27 @@ function thumbFor(P){
   thumbs[P.slug]=r.domElement.toDataURL('image/png');
   return thumbs[P.slug];
 }
-let shelfBuilt=false;
 function buildShelf(){
-  if(shelfBuilt) return; shelfBuilt=true;
+  // whoever you came from goes first
+  const order=cameFrom?[cameFrom].concat(PEOPLE.filter(p=>p!==cameFrom)):PEOPLE;
   const shelf=document.getElementById('shelf');
-  shelf.replaceChildren(...PEOPLE.map(P=>{
+  shelf.replaceChildren(...order.map(P=>{
     const img=el('img',{alt:`${P.first}'s pack`, decoding:'async'});
     const a=el('a',{className:'pack-tile'+(P.soon?' soon':''), href:'#'+P.slug},[el('div',{className:'thumb'},[img]), el('b',{textContent:P.first}), el('small',{textContent:P.soon?'Coming soon':`${P.role}, ${P.sub}`})]);
     return a;
   }));
   // render thumbnails one per frame so the page stays responsive
   const imgs=[...shelf.querySelectorAll('img')]; let i=0;
-  (function next(){ if(i>=PEOPLE.length) return; imgs[i].src=thumbFor(PEOPLE[i]); i++; requestAnimationFrame(next); })();
+  (function next(){ if(i>=order.length) return; imgs[i].src=thumbFor(order[i]); i++; requestAnimationFrame(next); })();
 }
 
 // ---------- routing: #all, #slug, or /slug on your own host ----------
 const tabAll=document.getElementById('tabAll'), tabMe=document.getElementById('tabMe'), allView=document.getElementById('all');
-let focusP=PEOPLE.find(p=>p.slug==='vishesh'), booted=false; // default pack stays Vishesh
+let booted=false;
+// a person's own link (/config/sameen/) makes them the focus, even when opening #all from there; otherwise Vishesh
+const pathP=(()=>{const seg=decodeURIComponent(location.pathname.split('/').filter(Boolean).pop()||'').toLowerCase().replace(/\.html?$/,''); return bySlug[seg]||null;})();
+let focusP=pathP||PEOPLE.find(p=>p.slug==='vishesh'); // default pack stays Vishesh
+let cameFrom=pathP; // set once someone's own pack has been opened; the shelf leads with them
 function readRoute(){
   const h=decodeURIComponent(location.hash.slice(1)).toLowerCase();
   if(h==='all') return 'all';
@@ -641,7 +645,7 @@ function applyRoute(){
     allView.hidden=false; tabAll.setAttribute('aria-current','page'); tabMe.removeAttribute('aria-current');
     hint.classList.add('gone'); buildShelf(); return;
   }
-  const P=r?bySlug[r]:focusP;
+  const P=r?bySlug[r]:focusP; if(r) cameFrom=P;
   allView.hidden=true; tabMe.setAttribute('aria-current','page'); tabAll.removeAttribute('aria-current');
   tabMe.textContent=P.first; tabMe.href='#'+P.slug; document.title=`${P.first} · Sweet Sticks`;
   if(P!==current || !booted){ focusP=P; enter(P); }
