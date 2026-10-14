@@ -26,3 +26,7 @@ Built on vssgpt.
 ## Editing
 
 `sweet-sticks.html` is the source. After changing it, run `python3 build.py` to refresh `index.html`, `404.html` and the route folders, then push. `.github/workflows/pages.yml` deploys every push to `main`.
+
+## Vercel
+
+The repo is also ready for Vercel: import `vssgpt/config` at vercel.com/new, keep Framework Preset on "Other" with no build command, and deploy. Every push to `main` then redeploys both Vercel and GitHub Pages. On Vercel the links drop the `/config` part, e.g. `your-project.vercel.app/sameen`. `vercel.json` sends any unknown path to the main page, which opens Vishesh's pack.
